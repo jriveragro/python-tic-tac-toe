@@ -52,12 +52,20 @@ def get_players_symbols():
 
     return dict
 
+def is_winner(selections):
+    winner_lines = [('1', '2', '3'), ('1', '5', '9'), ('1', '4', '7'), ('2', '5', '8'), 
+                    ('3', '5', '7'), ('3', '6', '9'), ('4', '5', '6'), ('7', '8', '9')]
+
+    return selections in winner_lines
+
+
+
 
 r1 = ['      ','      ','      ']
 r2 = ['      ','      ','      ']
 r3 = ['      ','      ','      ']
 
-game_tracker = {'p1_symbol': '', 'p1_position': 0, 'p1_turn': 1, 'p2_symbol': '', 'p2_position': 0, 'p2_turn': 2}
+game_tracker = {'p1_symbol': '', 'p1_position': 0, 'p1_turn': 1, 'p1_selections': [], 'p2_symbol': '', 'p2_position': 0, 'p2_turn': 2, 'p2_selections': []}
 
 print_welcome()
 response = ask_user_to_play()
@@ -84,7 +92,8 @@ elif response == True:
 
         if position in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
             game_tracker[f'p{index}_position'] = position
-
+            game_tracker[f'p{index}_selections'].append(position)
+ 
             if position in ['1', '2', '3']:
                 if position == '1':
                     r3[0] = f'   {game_tracker[f"p{index}_symbol"]}  '
@@ -119,6 +128,11 @@ elif response == True:
             draw_board(r1, r2, r3)
             game_counter += 1
             print_line(1)
+
+            if len(game_tracker[f"p{index}_selections"]) % 3:
+                selections = tuple(sorted(game_tracker[f"p{index}_selections"]))
+                if is_winner(selections) == True:
+                    print(f'Player {index} has won!')
 
         elif position.lower() == 'q':
            print('The game has been ended by user. Good Bye!')
