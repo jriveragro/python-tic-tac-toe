@@ -1,3 +1,6 @@
+# ================================================================================================ #
+# === User defined functions start here ========================================================== #
+# ================================================================================================ #
 def draw_board(row1, row2, row3):
     print('            |        |            ')
     print(f'     {row1[0]} | {row1[1]} | {row1[2]} ')
@@ -53,20 +56,29 @@ def get_players_symbols():
     return dict
 
 def is_winner(selections):
-    winner = False
     winner_lines = [('1', '2', '3'), ('1', '5', '9'), ('1', '4', '7'), ('2', '5', '8'), 
                     ('3', '5', '7'), ('3', '6', '9'), ('4', '5', '6'), ('7', '8', '9')]
-    print(f'Inside is_winner... This is selections:> {selections}')
+    is_winner = False
+
     for element in winner_lines:
-        print(f'Inside for-loop... This is element:> {element}')
-        if element in selections:
-            print(f'Selections contains a winner line!')
-            winner == True
+        in_winner_line = 0
+        for number in element:
+            if number in selections:
+                in_winner_line += 1
+                if in_winner_line == 3:
+                    is_winner = True
+                    break
     
-    return winner
+    return is_winner
+
+# ================================================================================================ #
+# === User defined functions end  here =========================================================== #
+# ================================================================================================ #
 
 
-
+# ================================================================================================ #
+# === Main program starts here =================================================================== #
+# ================================================================================================ #
 r1 = ['      ','      ','      ']
 r2 = ['      ','      ','      ']
 r3 = ['      ','      ','      ']
@@ -136,14 +148,19 @@ elif response == True:
             print_line(1)
 
             if len(game_tracker[f"p{index}_selections"]) >= 3:
-                selections = tuple(sorted(game_tracker[f"p{index}_selections"]))
-                print(f'This is the selection::>> {selections}')
+                selections = sorted(game_tracker[f"p{index}_selections"])
                 if is_winner(selections) == True:
-                     print(f'Player {index} has won!')
+                    print_line(1)
+                    print('===============================', f'== >>> Player {index} has won! <<< ==', '===============================', sep='\n')
+                    print_line(1)
 
 
         elif position.lower() == 'q':
            print('The game has been ended by user. Good Bye!')
+
+# ================================================================================================ #
+# === Main program ends here ===================================================================== #
+# ================================================================================================ #
 
 
 
