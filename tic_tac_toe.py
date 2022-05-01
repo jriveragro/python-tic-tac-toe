@@ -1,6 +1,13 @@
+import os
+from turtle import clear
+
 # ================================================================================================ #
 # === User defined functions start here ========================================================== #
 # ================================================================================================ #
+def clear_screen():
+    os.system('cls' if os.name=='nt' else 'clear')
+    
+
 def print_line(num):
     print('\n'*num)
 
@@ -42,7 +49,7 @@ def get_message(key):
 
 
 def prompt_user(message):
-    response = input(message)
+    response = input(message + ' ')
 
     return response
 
@@ -83,13 +90,13 @@ def announce_player_symbols(tracker, message):
     print(message %(tracker['p1_symbol'], tracker['p2_symbol']))
 
 
-def display_game_turn(index, message):
+def display_game_turn(index, message, position):
     response = prompt_user(message %(index))
     
     return response
 
 
-def draw_board(tracker, i, r1, r2, r3):
+def assign_selection(tracker, i, r1, r2, r3):
     if tracker[f'p{i}_position'] in ['1', '2', '3']:
         if tracker[f'p{i}_position'] == '1':
             r3[0] = f'   {tracker[f"p{i}_symbol"]}  '
@@ -119,8 +126,11 @@ def draw_board(tracker, i, r1, r2, r3):
              
          elif tracker[f'p{i}_position'] == '9':
              r1[2] = f'   {tracker[f"p{i}_symbol"]}  '
+    
+    return r1, r2, r3
 
 
+def draw_board(r1, r2, r3):
     print('            |        |            ', f'     {r1[0]} | {r1[1]} | {r1[2]} ', '            |        |            ', '   ----------------------------', sep='\n')
     print('            |        |            ', f'     {r2[0]} | {r2[1]} | {r2[2]} ', '            |        |            ', '   ----------------------------', sep='\n')
     print('            |        |            ', f'     {r3[0]} | {r3[1]} | {r3[2]} ', '            |        |            ', sep='\n')
@@ -156,6 +166,38 @@ def set_game():
                     'p2_symbol': '', 'p2_position': 0, 'p2_turn': 2, 'p2_selections': []}
     
     return r1, r2, r3, tracker
+
+
+def do_not_play_again():
+    msg = get_message('bye')
+    print(msg)
+
+
+def play_again(r1, r2, r3, tracker):
+    r1, r2, r3, tracker = set_game()
+      
+    msg = get_message('symbol')
+    tracker['p1_symbol'], tracker['p2_symbol'] = get_players_symbols(msg)
+         
+    msg = get_message('anounce')
+    announce_player_symbols(tracker, msg)
+    print_line(1)
+
+    draw_board(r1, r2, r3)
+    print_line(1)
+
+    return r1, r2, r3, tracker
+
+
+def replay():
+    msg = get_message('replay')
+    response = ask_user_to_play(msg)
+
+    if response == False:
+        return False
+
+    elif response == True:
+        return True
 # ================================================================================================ #
 # === User defined functions end  here =========================================================== #
 # ================================================================================================ #
@@ -184,6 +226,9 @@ elif response == True:
     msg = get_message('anounce')
     announce_player_symbols(game_tracker, msg)
     print_line(1)
+
+    draw_board(row1, row2, row3)
+    print_line(1)
     
     position = ''
     play_counter = len(game_tracker['p1_selections']) + len(game_tracker['p2_selections'])
@@ -194,9 +239,10 @@ elif response == True:
                 index = 1
             else:
                 index = 2
-                 
+
             msg = get_message('turn')     
-            position = display_game_turn(index, msg)
+            position = display_game_turn(index, msg, position)
+            clear_screen()
               
             if position.lower() == 'q':
                 msg = get_message('end')
@@ -206,8 +252,9 @@ elif response == True:
             elif position in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                 game_tracker[f'p{index}_position'] = position
                 game_tracker[f'p{index}_selections'].append(position)
-                
-                draw_board(game_tracker, index, row1, row2, row3)
+
+                row1, row2, row3 = assign_selection(game_tracker, index, row1, row2, row3)
+                draw_board(row1, row2, row3)
                 print_line(1)
                  
                 if len(game_tracker[f"p{index}_selections"]) >= 3:
@@ -222,44 +269,28 @@ elif response == True:
 
                         game_number += 1
 
-                        msg = get_message('replay')
-                        response = ask_user_to_play(msg)
-                        if response == False:
-                            msg = get_message('end')
-                            print(msg)
+                        replay_response = replay()
+                        if replay_response == False:
+                            do_not_play_again()
                             break
-                             
-                        elif response == True:
-                            row1, row2, row3, game_tracker = set_game()
-
-                            msg = get_message('symbol')
-                            game_tracker['p1_symbol'], game_tracker['p2_symbol'] = get_players_symbols(msg)
-                                 
-                            msg = get_message('anounce')
-                            announce_player_symbols(game_tracker, msg)
-                            print_line(1)
+                                             
+                        elif replay_response == True:
+                            clear_screen()
+                            row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
                     
         else:
             msg = get_message('full')
             print(msg)
 
-            msg = get_message('replay')
-            response = ask_user_to_play(msg)
-            if response == False:
-                msg = get_message('end')
-                print(msg)
+            replay_response = replay()
+            if replay_response == False:
+                do_not_play_again()
                 break
-                 
-            elif response == True:
-                row1, row2, row3, game_tracker = set_game()
 
-                msg = get_message('symbol')
-                game_tracker['p1_symbol'], game_tracker['p2_symbol'] = get_players_symbols(msg)
-                     
-                msg = get_message('anounce')
-                announce_player_symbols(game_tracker, msg)
-                print_line(1)
-             
+            elif replay_response == True:
+                clear_screen()
+                row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
+
         play_counter = len(game_tracker['p1_selections']) + len(game_tracker['p2_selections'])
 
 # ================================================================================================ #
