@@ -31,7 +31,7 @@ def get_message(key):
         message = 'Player 1 you are %s, Player 2 you are %s.... Let\'s play!'
 
     elif key.lower() == 'turn':
-        message = 'Player %s it\'s your turn, choose your position in the board: Top line[7, 8 ,9], Center line[4, 5, 6], Bottom line[1, 2, 3]... press Q to leave the game:>'
+        message = 'Player %s it\'s your turn, choose your position in the board: Top line[%s, %s ,%s], Center line[%s, %s, %s], Bottom line[%s, %s, %s]... press Q to leave the game:>'
 
     elif key.lower() == 'end':
         message = 'The game has been ended by player. Good Bye!'
@@ -90,8 +90,8 @@ def announce_player_symbols(tracker, message):
     print(message %(tracker['p1_symbol'], tracker['p2_symbol']))
 
 
-def display_game_turn(index, message, position):
-    response = prompt_user(message %(index))
+def display_game_turn(index, message, positions):
+    response = prompt_user(message %(index, positions[0], positions[1], positions[2], positions[3], positions[4], positions[5], positions[6], positions[7], positions[8]))
     
     return response
 
@@ -158,6 +158,8 @@ def display_winner(index, message):
 
 
 def set_game():
+    board_positions = ['7', '8', '9', '4', '5', '6', '1', '2', '3']
+
     r1 = ['      ','      ','      ']
     r2 = ['      ','      ','      ']
     r3 = ['      ','      ','      ']
@@ -165,7 +167,7 @@ def set_game():
     tracker = {'p1_symbol': '', 'p1_position': 0, 'p1_turn': 1, 'p1_selections': [], 
                     'p2_symbol': '', 'p2_position': 0, 'p2_turn': 2, 'p2_selections': []}
     
-    return r1, r2, r3, tracker
+    return r1, r2, r3, tracker, board_positions
 
 
 def do_not_play_again():
@@ -175,6 +177,8 @@ def do_not_play_again():
 
 def play_again(r1, r2, r3, tracker):
     r1, r2, r3, tracker = set_game()
+
+    clear_screen()
       
     msg = get_message('symbol')
     tracker['p1_symbol'], tracker['p2_symbol'] = get_players_symbols(msg)
@@ -198,6 +202,16 @@ def replay():
 
     elif response == True:
         return True
+
+
+def make_unavailable(selected_position, available_positions):
+   for i, e in enumerate(available_positions):
+       if e == selected_position:
+           available_positions[i] = '-'
+           break
+
+   return available_positions
+
 # ================================================================================================ #
 # === User defined functions end  here =========================================================== #
 # ================================================================================================ #
@@ -206,7 +220,7 @@ def replay():
 # ================================================================================================ #
 # === Main program starts here =================================================================== #
 # ================================================================================================ #
-row1, row2, row3, game_tracker = set_game()
+row1, row2, row3, game_tracker, board_positions = set_game()
 game_number = 0
 
 msg = get_message('welcome')
@@ -241,7 +255,7 @@ elif response == True:
                 index = 2
 
             msg = get_message('turn')     
-            position = display_game_turn(index, msg, position)
+            position = display_game_turn(index, msg, board_positions)
             clear_screen()
               
             if position.lower() == 'q':
@@ -252,6 +266,8 @@ elif response == True:
             elif position in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                 game_tracker[f'p{index}_position'] = position
                 game_tracker[f'p{index}_selections'].append(position)
+
+                board_positions = make_unavailable(position, board_positions)
 
                 row1, row2, row3 = assign_selection(game_tracker, index, row1, row2, row3)
                 draw_board(row1, row2, row3)
@@ -275,7 +291,6 @@ elif response == True:
                             break
                                              
                         elif replay_response == True:
-                            clear_screen()
                             row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
                     
         else:
@@ -288,7 +303,6 @@ elif response == True:
                 break
 
             elif replay_response == True:
-                clear_screen()
                 row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
 
         play_counter = len(game_tracker['p1_selections']) + len(game_tracker['p2_selections'])
