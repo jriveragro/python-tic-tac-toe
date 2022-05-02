@@ -31,7 +31,7 @@ def get_message(key):
         message = 'Player 1 you are %s, Player 2 you are %s.... Let\'s play!'
 
     elif key.lower() == 'turn':
-        message = 'Player %s it\'s your turn, choose your position in the board: Top line[%s, %s ,%s], Center line[%s, %s, %s], Bottom line[%s, %s, %s]... press Q to leave the game:>'
+        message = 'Player %s [%s], it\'s your turn, choose your position in the board: Top line[%s, %s ,%s], Center line[%s, %s, %s], Bottom line[%s, %s, %s]... press Q to leave the game:>'
 
     elif key.lower() == 'end':
         message = 'The game has been ended by player. Good Bye!'
@@ -90,8 +90,8 @@ def announce_player_symbols(tracker, message):
     print(message %(tracker['p1_symbol'], tracker['p2_symbol']))
 
 
-def display_game_turn(index, message, positions):
-    response = prompt_user(message %(index, positions[0], positions[1], positions[2], positions[3], positions[4], positions[5], positions[6], positions[7], positions[8]))
+def display_game_turn(index, message, positions, symbol):
+    response = prompt_user(message %(index, symbol, positions[0], positions[1], positions[2], positions[3], positions[4], positions[5], positions[6], positions[7], positions[8]))
     
     return response
 
@@ -175,8 +175,8 @@ def do_not_play_again():
     print(msg)
 
 
-def play_again(r1, r2, r3, tracker):
-    r1, r2, r3, tracker = set_game()
+def play_again(r1, r2, r3, tracker, board_positions):
+    r1, r2, r3, tracker, board_positions = set_game()
 
     clear_screen()
       
@@ -190,7 +190,7 @@ def play_again(r1, r2, r3, tracker):
     draw_board(r1, r2, r3)
     print_line(1)
 
-    return r1, r2, r3, tracker
+    return r1, r2, r3, tracker, board_positions
 
 
 def replay():
@@ -255,8 +255,7 @@ elif response == True:
                 index = 2
 
             msg = get_message('turn')     
-            position = display_game_turn(index, msg, board_positions)
-            clear_screen()
+            position = display_game_turn(index, msg, board_positions, game_tracker[f"p{index}_symbol"])
               
             if position.lower() == 'q':
                 msg = get_message('end')
@@ -266,6 +265,8 @@ elif response == True:
             elif position in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                 game_tracker[f'p{index}_position'] = position
                 game_tracker[f'p{index}_selections'].append(position)
+
+                clear_screen()
 
                 board_positions = make_unavailable(position, board_positions)
 
@@ -291,7 +292,7 @@ elif response == True:
                             break
                                              
                         elif replay_response == True:
-                            row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
+                            row1, row2, row3, game_tracker, board_positions = play_again(game_tracker, row1, row2, row3, board_positions)
                     
         else:
             msg = get_message('full')
@@ -303,7 +304,7 @@ elif response == True:
                 break
 
             elif replay_response == True:
-                row1, row2, row3, game_tracker = play_again(game_tracker, row1, row2, row3)
+                row1, row2, row3, game_tracker, board_positions = play_again(game_tracker, row1, row2, row3, board_positions)
 
         play_counter = len(game_tracker['p1_selections']) + len(game_tracker['p2_selections'])
 
